@@ -151,10 +151,14 @@ const WalletConnectBalanced = () => {
       textAlign: 'center', 
       minHeight: '100vh',
       padding: '1rem',
-      background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1)',
-      backgroundSize: '300% 300%',
-      animation: 'gradientMove 8s ease infinite',
-      color: 'white'
+      background: `
+        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.3)),
+        linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7)
+      `,
+      backgroundSize: '400% 400%',
+      animation: 'gradientMove 12s ease infinite',
+      color: 'white',
+      position: 'relative'
     }}>
       {/* Match Popup - Optimizado */}
       {showMatchPopup && (
@@ -218,11 +222,36 @@ const WalletConnectBalanced = () => {
         </div>
       )}
       
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}>
-        ❤️⛓️ LoveChain
-      </h1>
+      {/* Header con logo integrado */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '1rem',
+        marginBottom: '0.5rem'
+      }}>
+        <img
+          src={require('../assets/logo.png')}
+          alt="LoveChain Logo"
+          style={{
+            height: '60px',
+            width: '60px',
+            objectFit: 'contain',
+            background: 'rgba(255,255,255,0.9)',
+            borderRadius: '15px',
+            padding: '8px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+          }}
+          onError={e => { 
+            e.target.style.display = 'none';
+          }}
+        />
+        <h1 style={{ fontSize: '2.5rem', margin: 0, textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}>
+          ❤️⛓️ LoveChain
+        </h1>
+      </div>
       <p style={{ marginBottom: '2rem', fontSize: '1.1rem', textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
-        Blockchain Dating - Versión Balanced
+        Swipe to Find Your Blockchain Soulmate
       </p>
 
       {!publicKey ? (
@@ -354,15 +383,19 @@ const WalletConnectBalanced = () => {
           </div>
 
           {/* Perfil actual */}
-          <div style={{
-            background: 'rgba(255,255,255,0.95)',
-            padding: '2rem',
-            borderRadius: '20px',
-            maxWidth: '350px',
-            margin: '0 auto 2rem auto',
-            color: '#333',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-          }}>
+          <div 
+            className="fade-in-up"
+            style={{
+              background: 'rgba(255,255,255,0.95)',
+              padding: '2rem',
+              borderRadius: '20px',
+              maxWidth: '350px',
+              margin: '0 auto 2rem auto',
+              color: '#333',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.3)'
+            }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
               {currentProfile.emoji}
             </div>
@@ -584,11 +617,66 @@ const WalletConnectBalanced = () => {
         </div>
       )}
 
+      {/* Rectángulo de información inferior - EL QUE SE PERDIÓ */}
+      {userRegistered && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(255,255,255,0.95)',
+          padding: '1rem 2rem',
+          borderRadius: '25px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          color: '#333',
+          fontSize: '0.9rem',
+          maxWidth: '90%',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.2)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1rem' }}>👤</span>
+              <span><strong>{nickname}</strong></span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1rem' }}>🔗</span>
+              <span>{publicKey?.toString().slice(0, 4)}...{publicKey?.toString().slice(-4)}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1rem' }}>📊</span>
+              <span>{likesReceived} likes • {matches.length} matches</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1rem' }}>⛓️</span>
+              <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Solana Devnet</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes gradientMove {
           0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          25% { background-position: 100% 50%; }
+          50% { background-position: 100% 100%; }
+          75% { background-position: 0% 100%; }
           100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .fade-in-up {
+          animation: fadeInUp 0.6s ease-out;
         }
       `}</style>
     </div>
