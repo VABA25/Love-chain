@@ -1,6 +1,6 @@
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program, AnchorProvider, web3 } from '@coral-xyz/anchor';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import idl from '../idl/lovechain_anchor.json';
 
 const programID = new web3.PublicKey('42CA8hKevXBiZqKMveUriTns8SxQFRLE4tHt6bXjCoTi');
@@ -177,6 +177,23 @@ export function useAnchorProgram() {
             // Award LOVE tokens for matches
             setLoveBalance(prev => prev + 10);
             console.log('💖 Demo match! +10 LOVE tokens awarded');
+            
+            // Create a separate MATCH transaction
+            setTimeout(() => {
+              const matchTransaction = {
+                id: `match_tx_${Date.now()}`,
+                liker: wallet.publicKey.toString(),
+                target: targetUser,
+                type: 'MATCH',
+                reward: 10,
+                timestamp: new Date().toISOString(),
+                status: 'confirmed',
+                signature: `match_sig_${Math.random().toString(36).substr(2, 9)}`
+              };
+              
+              setTransactions(prev => [matchTransaction, ...prev]);
+              console.log('🎉 Demo match transaction recorded:', matchTransaction);
+            }, 500); // Small delay to show both transactions separately
           }
           
           setIsLoading(false);

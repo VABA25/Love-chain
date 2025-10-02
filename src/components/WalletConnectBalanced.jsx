@@ -6,9 +6,9 @@ const WalletConnectBalanced = () => {
   console.log('🔍 WalletConnectBalanced se está renderizando');
   const { publicKey, connect, select, wallets } = useWallet();
   const { 
-    program, 
-    wallet, 
-    connection,
+    // program, 
+    // wallet, 
+    // connection,
     solBalance,
     loveBalance,
     isLoading,
@@ -752,23 +752,36 @@ const WalletConnectBalanced = () => {
             >
               📤
             </button>
-            <button
-              onClick={() => sendLoveGift(10)}
-              disabled={isLoading || loveBalance < 10}
-              style={{
-                background: loveBalance >= 10 ? 'linear-gradient(135deg, #ff6b9d, #8b5cf6)' : '#ccc',
-                color: 'white',
-                border: 'none',
-                padding: '12px 16px',
-                borderRadius: '25px',
-                cursor: loveBalance >= 10 ? 'pointer' : 'not-allowed',
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                opacity: isLoading ? 0.7 : 1
-              }}
-            >
-              {isLoading ? '🔄' : '💖 10 LOVE'}
-            </button>
+            {loveBalance >= 10 && (
+              <button
+                onClick={() => sendLoveGift(10)}
+                disabled={isLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #ff6b9d, #8b5cf6)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 16px',
+                  borderRadius: '25px',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  opacity: isLoading ? 0.7 : 1,
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {isLoading ? '🔄 Enviando...' : '💖 Enviar 10 LOVE'}
+              </button>
+            )}
+            {loveBalance < 10 && (
+              <div style={{
+                color: '#666',
+                fontSize: '0.8rem',
+                fontStyle: 'italic',
+                marginTop: '8px'
+              }}>
+                💡 Necesitas {10 - loveBalance} LOVE más para enviar regalo
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -803,7 +816,8 @@ const WalletConnectBalanced = () => {
                 <span style={{ fontWeight: 'bold' }}>
                   {tx.type === 'LOVE_TRANSFER' ? '💖' : 
                    tx.type === 'CREATE_PROFILE' ? '👤' : 
-                   tx.type === 'LIKE' ? '👍' : '🔄'}
+                   tx.type === 'LIKE' ? '👍' : 
+                   tx.type === 'MATCH' ? '🎉' : '🔄'}
                   {tx.type.replace('_', ' ')}
                 </span>
                 <span style={{ 
@@ -817,6 +831,14 @@ const WalletConnectBalanced = () => {
               </div>
               {tx.amount && (
                 <div>Amount: {tx.amount} {tx.type === 'LOVE_TRANSFER' ? 'LOVE' : 'SOL'}</div>
+              )}
+              {tx.reward && (
+                <div style={{ color: '#4CAF50' }}>Reward: +{tx.reward} LOVE 🎁</div>
+              )}
+              {tx.target && (
+                <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>
+                  Target: {tx.target}
+                </div>
               )}
               <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>
                 {new Date(tx.timestamp).toLocaleTimeString()}
