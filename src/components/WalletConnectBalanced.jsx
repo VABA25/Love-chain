@@ -72,7 +72,7 @@ const WalletConnectBalanced = () => {
   // Solo un ref para chat - optimizado
   const chatTimeoutRef = useRef(null);
 
-  // Perfiles optimizados - solo 4 en lugar de 5
+  // 10 perfiles diversos para una experiencia más rica
   const profiles = [
     {
       id: 1,
@@ -105,6 +105,54 @@ const WalletConnectBalanced = () => {
       bio: "DeFi whale 🐋 | Yield farming expert 🌾 | Seeking my hodling partner 💎🙌",
       emoji: "👨‍💼",
       location: "Mexico City"
+    },
+    {
+      id: 5,
+      name: "Luna",
+      age: 26,
+      bio: "DAO governance queen 👑 | Community builder 🤝 | Let's vote for love 🗳️💕",
+      emoji: "👩‍⚖️",
+      location: "Berlin"
+    },
+    {
+      id: 6,
+      name: "Alex",
+      age: 24,
+      bio: "Crypto trader 📈 | Technical analysis nerd 📊 | Ready to moon together 🌙✨",
+      emoji: "👨‍📊",
+      location: "Tokyo"
+    },
+    {
+      id: 7,
+      name: "Maya",
+      age: 29,
+      bio: "Blockchain security expert 🔐 | Bug bounty hunter 🎯 | Securing hearts & wallets 💝",
+      emoji: "👩‍💻",
+      location: "Toronto"
+    },
+    {
+      id: 8,
+      name: "Rico",
+      age: 27,
+      bio: "NFT marketplace founder 🏪 | Digital art lover 🎭 | Creating masterpieces together 🎨",
+      emoji: "👨‍🎨",
+      location: "London"
+    },
+    {
+      id: 9,
+      name: "Zara",
+      age: 22,
+      bio: "Gaming on Solana 🎮 | P2E enthusiast 🏆 | Looking for my co-op partner 👫",
+      emoji: "👩‍🎮",
+      location: "Seoul"
+    },
+    {
+      id: 10,
+      name: "Kai",
+      age: 31,
+      bio: "Crypto podcast host 🎙️ | Web3 educator 📚 | Let's discuss love over coffee ☕💕",
+      emoji: "👨‍🏫",
+      location: "Amsterdam"
     }
   ];
 
