@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorProgram } from '../hooks/useAnchor';
 
 const WalletConnectBalanced = () => {
   console.log('🔍 WalletConnectBalanced se está renderizando');
   const { publicKey, connect, select, wallets } = useWallet();
+  const { program, wallet, connection } = useAnchorProgram();
   const [nickname, setNickname] = useState('');
   const [userRegistered, setUserRegistered] = useState(false);
   const [likesReceived, setLikesReceived] = useState(0);
@@ -15,6 +17,7 @@ const WalletConnectBalanced = () => {
   const [chatPartner, setChatPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [solBalance, setSolBalance] = useState(0);
   
   // Solo un ref para chat - optimizado
   const chatTimeoutRef = useRef(null);
@@ -62,6 +65,18 @@ const WalletConnectBalanced = () => {
     };
   }, []);
 
+  // 🎯 SIMULACIÓN DE BALANCE SOL PARA TESTING
+  useEffect(() => {
+    if (publicKey) {
+      console.log('💰 Simulando balance de SOL para testing...');
+      // Simular que tenemos 2.5 SOL para pruebas
+      setSolBalance(2.5);
+      console.log('✅ Balance simulado: 2.5 SOL (fake para testing)');
+    } else {
+      setSolBalance(0);
+    }
+  }, [publicKey]);
+
   const handleRegisterUser = async () => {
     if (!nickname.trim()) {
       alert('Por favor ingresa un nickname');
@@ -75,11 +90,33 @@ const WalletConnectBalanced = () => {
     
     setIsRegistering(true);
     
+    // 💰 SIMULAR COSTO DE REGISTRO 
+    const registrationCost = 0.01; // 0.01 SOL para crear perfil SBT
+    if (solBalance < registrationCost) {
+      alert(`⚠️ No tienes suficiente SOL para registrarte. Necesitas ${registrationCost} SOL. Balance actual: ${solBalance} SOL`);
+      setIsRegistering(false);
+      return;
+    }
+    
+    // Probar conexión blockchain
+    if (program && wallet) {
+      console.log('🚀 Usando blockchain real para registro!');
+      console.log('Program:', program);
+      console.log('Wallet:', wallet.publicKey.toString());
+      // TODO: Llamar smart contract aquí
+    } else {
+      console.log('⚠️ Usando modo demo para registro');
+    }
+    
     // Timeout rápido
     setTimeout(() => {
+      // Descontar SOL por crear perfil SBT
+      setSolBalance(prev => prev - registrationCost);
+      console.log(`💸 Registro completado: -${registrationCost} SOL (creación de perfil SBT)`);
+      
       setUserRegistered(true);
       setIsRegistering(false);
-      alert(`🎉 ¡Bienvenido ${nickname}! Tu perfil SBT ha sido creado en Solana.`);
+      alert(`🎉 ¡Bienvenido ${nickname}! Tu perfil SBT ha sido creado en Solana (-${registrationCost} SOL).`);
     }, 1200);
   };
 
@@ -122,6 +159,17 @@ const WalletConnectBalanced = () => {
 
   const handleSwipe = (direction) => {
     const currentProfile = profiles[currentProfileIndex];
+    
+    // 💰 SIMULAR COSTO DE TRANSACCIÓN
+    const transactionCost = 0.0001; // Muy barato para testing
+    if (solBalance < transactionCost) {
+      alert('⚠️ No tienes suficiente SOL para esta transacción. Balance: ' + solBalance + ' SOL');
+      return;
+    }
+    
+    // Descontar SOL por la transacción
+    setSolBalance(prev => prev - transactionCost);
+    console.log(`💸 Transacción: -${transactionCost} SOL (${direction === 'right' ? 'Like' : 'Pass'})`);
     
     if (direction === 'right') {
       // Incrementar likes recibidos
@@ -315,6 +363,8 @@ const WalletConnectBalanced = () => {
             fontSize: '0.9rem'
           }}>
             🔗 <strong>Wallet:</strong> {publicKey.toString().slice(0, 8)}...{publicKey.toString().slice(-8)}
+            <br />
+            💰 <strong>Balance:</strong> {solBalance} SOL {solBalance > 0 ? '(simulado para testing)' : ''}
           </div>
           <input
             type="text"

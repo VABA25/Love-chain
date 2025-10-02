@@ -14,20 +14,21 @@ export function useAnchorProgram() {
       return null;
     }
     
-    // Temporalmente return null para modo demo
-    // TODO: Arreglar IDL mismatch
-    console.log('🚧 Blockchain connection disabled temporarily - using demo mode');
-    return null;
-    
-    /* 
-    const provider = new AnchorProvider(
-      connection,
-      wallet,
-      AnchorProvider.defaultOptions()
-    );
-    
-    return new Program(idl, programID, provider);
-    */
+    try {
+      const provider = new AnchorProvider(
+        connection,
+        wallet,
+        AnchorProvider.defaultOptions()
+      );
+      
+      console.log('🚀 Connecting to Solana blockchain...');
+      const program = new Program(idl, programID, provider);
+      console.log('✅ Blockchain connection successful!');
+      return program;
+    } catch (error) {
+      console.log('⚠️ Blockchain connection failed, falling back to demo mode:', error);
+      return null;
+    }
   }, [connection, wallet]);
 
   return { program, wallet, connection };
