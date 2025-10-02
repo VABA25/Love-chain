@@ -4,6 +4,41 @@ import { useAnchorProgram } from '../hooks/useAnchor';
 
 const WalletConnectBalanced = () => {
   console.log('🔍 WalletConnectBalanced se está renderizando');
+  
+  // Añadir estilos CSS para las notificaciones
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
   const { publicKey, connect, select, wallets } = useWallet();
   const { 
     // program, 
@@ -22,7 +57,8 @@ const WalletConnectBalanced = () => {
   
   const [nickname, setNickname] = useState('');
   const [userRegistered, setUserRegistered] = useState(false);
-  const [likesReceived, setLikesReceived] = useState(0);
+  const [likesReceived, setLikesReceived] = useState(0); // Likes que ME dieron
+  const [likesGiven, setLikesGiven] = useState(0); // Likes que YO di
   const [matches, setMatches] = useState([]);
   const [isRegistering, setIsRegistering] = useState(false);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
@@ -31,6 +67,7 @@ const WalletConnectBalanced = () => {
   const [chatPartner, setChatPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [isSendingLove, setIsSendingLove] = useState(false);
   
   // Solo un ref para chat - optimizado
   const chatTimeoutRef = useRef(null);
@@ -85,6 +122,47 @@ const WalletConnectBalanced = () => {
       checkBalance();
     }
   }, [publicKey, checkBalance]);
+
+  // 💖 SIMULATE LIKES RECEIVED FROM OTHER USERS
+  useEffect(() => {
+    if (!publicKey || !userRegistered) return;
+
+    // Simular likes recibidos de otros usuarios cada 10-20 segundos
+    const interval = setInterval(() => {
+      // Solo agregar likes recibidos ocasionalmente (50% de probabilidad)
+      if (Math.random() > 0.5) {
+        const randomProfile = profiles[Math.floor(Math.random() * profiles.length)];
+        setLikesReceived(prev => {
+          const newLikes = prev + 1;
+          console.log(`💖 ${randomProfile.name} te dio like! Total likes recibidos: ${newLikes}`);
+          console.log('🔔 Creando notificación de like recibido...');
+          
+          // Mostrar notificación temporal
+          const notification = document.createElement('div');
+          notification.innerHTML = `💖 ${randomProfile.name} te dio like!`;
+          notification.style.cssText = `
+            position: fixed; top: 20px; right: 20px; z-index: 9999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 12px 20px; border-radius: 12px;
+            font-size: 14px; font-weight: bold; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+          `;
+          document.body.appendChild(notification);
+          
+          // Remover notificación después de 3 segundos
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 3000);
+          
+          return newLikes;
+        });
+      }
+    }, Math.random() * 10000 + 10000); // Entre 10-20 segundos
+
+    return () => clearInterval(interval);
+  }, [publicKey, userRegistered, profiles]);
 
   const handleRegisterUser = async () => {
     if (!nickname.trim()) {
@@ -183,6 +261,7 @@ const WalletConnectBalanced = () => {
       return;
     }
     
+    setIsSendingLove(true);
     try {
       console.log(`💖 Sending ${amount} LOVE tokens to ${chatPartner.name}...`);
       
@@ -220,6 +299,8 @@ const WalletConnectBalanced = () => {
     } catch (error) {
       console.error('❌ Error sending LOVE tokens:', error);
       alert('❌ Error al enviar LOVE tokens. Inténtalo de nuevo.');
+    } finally {
+      setIsSendingLove(false);
     }
   };
 
@@ -243,8 +324,8 @@ const WalletConnectBalanced = () => {
         if (result) {
           console.log('✅ Like recorded:', result);
           
-          // Incrementar likes recibidos
-          setLikesReceived(prev => prev + 1);
+          // Incrementar likes DADOS (YO di un like)
+          setLikesGiven(prev => prev + 1);
           
           // Check if it's a match
           if (result.isMatch) {
@@ -499,28 +580,42 @@ const WalletConnectBalanced = () => {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '2rem',
-            marginBottom: '2rem'
+            gap: '1.5rem',
+            marginBottom: '2rem',
+            flexWrap: 'wrap'
           }}>
             <div style={{
               background: 'rgba(255,255,255,0.2)',
               padding: '1rem',
               borderRadius: '12px',
-              minWidth: '100px',
-              backdropFilter: 'blur(10px)'
+              minWidth: '90px',
+              backdropFilter: 'blur(10px)',
+              textAlign: 'center'
             }}>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{likesReceived}</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>Likes Received</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ff6b9d' }}>{likesReceived}</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>💖 Received</div>
             </div>
             <div style={{
               background: 'rgba(255,255,255,0.2)',
               padding: '1rem',
               borderRadius: '12px',
-              minWidth: '100px',
-              backdropFilter: 'blur(10px)'
+              minWidth: '90px',
+              backdropFilter: 'blur(10px)',
+              textAlign: 'center'
             }}>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{matches.length}</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>Matches</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#c471ed' }}>{likesGiven}</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>👍 Given</div>
+            </div>
+            <div style={{
+              background: 'rgba(255,255,255,0.2)',
+              padding: '1rem',
+              borderRadius: '12px',
+              minWidth: '90px',
+              backdropFilter: 'blur(10px)',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#12c2e9' }}>{matches.length}</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>🎉 Matches</div>
             </div>
           </div>
 
@@ -758,21 +853,21 @@ const WalletConnectBalanced = () => {
             {canSendLove && (
               <button
                 onClick={() => sendLoveGift(10)}
-                disabled={isLoading}
+                disabled={isSendingLove}
                 style={{
                   background: 'linear-gradient(135deg, #ff6b9d, #8b5cf6)',
                   color: 'white',
                   border: 'none',
                   padding: '12px 16px',
                   borderRadius: '25px',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  cursor: isSendingLove ? 'not-allowed' : 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: 'bold',
-                  opacity: isLoading ? 0.7 : 1,
+                  opacity: isSendingLove ? 0.7 : 1,
                   transition: 'all 0.3s ease'
                 }}
               >
-                {isLoading ? '🔄 Enviando...' : '💖 Enviar 10 LOVE'}
+                {isSendingLove ? '🔄 Enviando...' : '💖 Enviar 10 LOVE'}
               </button>
             )}
             {!canSendLove && (
@@ -882,8 +977,50 @@ const WalletConnectBalanced = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1rem' }}>📊</span>
-              <span>{likesReceived} likes • {matches.length} matches</span>
+              <span>💖{likesReceived} • 👍{likesGiven} • 🎉{matches.length}</span>
             </div>
+            {/* DEBUG: Botón para probar notificaciones */}
+            <button
+              onClick={() => {
+                const randomProfile = profiles[Math.floor(Math.random() * profiles.length)];
+                setLikesReceived(prev => {
+                  const newLikes = prev + 1;
+                  console.log('🔔 TEST: Creando notificación de prueba...');
+                  
+                  // Mostrar notificación temporal
+                  const notification = document.createElement('div');
+                  notification.innerHTML = `💖 ${randomProfile.name} te dio like!`;
+                  notification.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 9999;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    font-size: 14px; font-weight: bold; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                    animation: slideIn 0.3s ease-out;
+                  `;
+                  document.body.appendChild(notification);
+                  
+                  // Remover notificación después de 3 segundos
+                  setTimeout(() => {
+                    if (notification.parentNode) {
+                      notification.parentNode.removeChild(notification);
+                    }
+                  }, 3000);
+                  
+                  return newLikes;
+                });
+              }}
+              style={{
+                background: '#ff6b9d',
+                color: 'white',
+                border: 'none',
+                padding: '4px 8px',
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                cursor: 'pointer'
+              }}
+            >
+              🔔 Test
+            </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1rem' }}>⛓️</span>
               <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Solana Devnet</span>
