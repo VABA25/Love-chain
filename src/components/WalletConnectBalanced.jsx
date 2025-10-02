@@ -622,22 +622,42 @@ const WalletConnectBalanced = () => {
         </div>
       ) : !userRegistered ? (
         <div style={{
-          background: 'rgba(255,255,255,0.95)',
-          padding: '2rem',
-          borderRadius: '15px',
-          maxWidth: '400px',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,248,255,0.9) 100%)',
+          padding: '2.5rem',
+          borderRadius: '25px',
+          maxWidth: '420px',
           margin: '0 auto',
           color: '#333',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+          boxShadow: '0 20px 50px rgba(102, 126, 234, 0.2), 0 8px 25px rgba(0,0,0,0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '2px solid rgba(102, 126, 234, 0.15)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <h3 style={{ marginBottom: '1rem' }}>📝 Crear Perfil SBT</h3>
+          {/* Efecto de brillo superior */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.8), transparent)',
+            zIndex: 1
+          }}></div>
+          <h3 style={{ marginBottom: '1.5rem', textAlign: 'center', fontSize: '1.4rem' }}>📝 Crear Perfil SBT</h3>
           <div style={{ 
-            background: isDemoMode ? '#fff3cd' : '#e8f5e8', 
-            padding: '0.8rem', 
-            borderRadius: '8px', 
-            marginBottom: '1rem',
+            background: isDemoMode 
+              ? 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 235, 59, 0.05) 100%)' 
+              : 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%)', 
+            padding: '1.2rem', 
+            borderRadius: '15px', 
+            marginBottom: '1.5rem',
             fontSize: '0.9rem',
-            border: isDemoMode ? '2px solid #ffc107' : '2px solid #28a745'
+            border: isDemoMode 
+              ? '2px solid rgba(255, 193, 7, 0.3)' 
+              : '2px solid rgba(40, 167, 69, 0.3)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
           }}>
             🔗 <strong>Wallet:</strong> {publicKey.toString().slice(0, 8)}...{publicKey.toString().slice(-8)}
             <br />
@@ -732,17 +752,29 @@ const WalletConnectBalanced = () => {
           <div 
             className="fade-in-up"
             style={{
-              background: 'rgba(255,255,255,0.95)',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,255,0.9) 100%)',
               padding: '2rem',
-              borderRadius: '20px',
+              borderRadius: '25px',
               maxWidth: '350px',
               margin: '0 auto 2rem auto',
               color: '#333',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.3)'
+              boxShadow: '0 15px 40px rgba(102, 126, 234, 0.15), 0 5px 15px rgba(0,0,0,0.1)',
+              backdropFilter: 'blur(20px)',
+              border: '2px solid rgba(102, 126, 234, 0.2)',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
+            {/* Efecto de brillo sutil */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '2px',
+              background: 'linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.6), transparent)',
+              zIndex: 1
+            }}></div>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem', textAlign: 'center' }}>
               {currentProfile?.emoji || '👤'}
             </div>
             <h3 
