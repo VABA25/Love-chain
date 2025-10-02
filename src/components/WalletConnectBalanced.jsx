@@ -69,6 +69,17 @@ const WalletConnectBalanced = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isSendingLove, setIsSendingLove] = useState(false);
   
+  // 👤 PROFILE EDITING SYSTEM
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    nickname: '',
+    bio: 'Nuevo en el mundo crypto 🚀 | Buscando mi match perfecto 💕',
+    age: 25,
+    location: 'Tu ciudad',
+    emoji: '😊',
+    interests: ['DeFi', 'NFTs']
+  });
+  
   // Solo un ref para chat - optimizado
   const chatTimeoutRef = useRef(null);
 
@@ -243,6 +254,12 @@ const WalletConnectBalanced = () => {
         version: '1.0'
       };
       
+      // Sincronizar con el perfil del usuario
+      setUserProfile(prev => ({
+        ...prev,
+        nickname: nickname
+      }));
+      
       // Usar la función blockchain del hook
       const result = await createUserProfile(profileData);
       
@@ -351,6 +368,37 @@ const WalletConnectBalanced = () => {
       setIsSendingLove(false);
     }
   };
+
+  // 👤 PROFILE EDITOR FUNCTIONS
+  const openProfileEditor = () => {
+    setShowProfileEditor(true);
+  };
+
+  const closeProfileEditor = () => {
+    setShowProfileEditor(false);
+  };
+
+  const saveProfile = () => {
+    console.log('💾 Guardando perfil:', userProfile);
+    
+    // Simular guardado en blockchain/localStorage
+    localStorage.setItem('lovechain_user_profile', JSON.stringify(userProfile));
+    
+    // Mostrar confirmación
+    alert(`✅ Perfil actualizado exitosamente!\n\n👤 ${userProfile.nickname}\n🎂 ${userProfile.age} años\n📍 ${userProfile.location}\n💭 ${userProfile.bio.substring(0, 50)}...`);
+    
+    setShowProfileEditor(false);
+  };
+
+  // Cargar perfil desde localStorage al iniciar
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('lovechain_user_profile');
+    if (savedProfile) {
+      const parsed = JSON.parse(savedProfile);
+      setUserProfile(parsed);
+      console.log('📂 Perfil cargado desde localStorage:', parsed);
+    }
+  }, []);
 
   const handleSwipe = async (direction) => {
     const currentProfile = profiles[currentProfileIndex];
@@ -1069,6 +1117,21 @@ const WalletConnectBalanced = () => {
             >
               🔔 Test
             </button>
+            {/* Botón para editar perfil */}
+            <button
+              onClick={openProfileEditor}
+              style={{
+                background: '#12c2e9',
+                color: 'white',
+                border: 'none',
+                padding: '4px 8px',
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                cursor: 'pointer'
+              }}
+            >
+              ✏️ Perfil
+            </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1rem' }}>⛓️</span>
               <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Solana Devnet</span>
@@ -1101,6 +1164,213 @@ const WalletConnectBalanced = () => {
           animation: fadeInUp 0.6s ease-out;
         }
       `}</style>
+
+      {/* 👤 PROFILE EDITOR MODAL */}
+      {showProfileEditor && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '2rem',
+            borderRadius: '20px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            color: 'white'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1.5rem' }}>✏️ Editar Perfil</h2>
+              <button
+                onClick={closeProfileEditor}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '30px',
+                  height: '30px',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Nickname */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                👤 Nickname
+              </label>
+              <input
+                type="text"
+                value={userProfile.nickname}
+                onChange={(e) => setUserProfile(prev => ({ ...prev, nickname: e.target.value }))}
+                placeholder="Tu nickname"
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  background: 'rgba(255,255,255,0.1)',
+                  color: 'white',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Bio */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                💭 Bio
+              </label>
+              <textarea
+                value={userProfile.bio}
+                onChange={(e) => setUserProfile(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Cuéntanos sobre ti y tu pasión por crypto..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  background: 'rgba(255,255,255,0.1)',
+                  color: 'white',
+                  outline: 'none',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit'
+                }}
+              />
+            </div>
+
+            {/* Age y Location en una fila */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                  🎂 Edad
+                </label>
+                <input
+                  type="number"
+                  value={userProfile.age}
+                  onChange={(e) => setUserProfile(prev => ({ ...prev, age: parseInt(e.target.value) || 18 }))}
+                  min="18"
+                  max="100"
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    background: 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 2 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                  📍 Ubicación
+                </label>
+                <input
+                  type="text"
+                  value={userProfile.location}
+                  onChange={(e) => setUserProfile(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Tu ciudad"
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    background: 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Emoji selector */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                😊 Avatar Emoji
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {['😊', '🤓', '😎', '🥰', '😘', '🚀', '💎', '🔥', '⚡', '🌟'].map(emoji => (
+                  <button
+                    key={emoji}
+                    onClick={() => setUserProfile(prev => ({ ...prev, emoji }))}
+                    style={{
+                      background: userProfile.emoji === emoji ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderRadius: '8px',
+                      padding: '0.5rem',
+                      cursor: 'pointer',
+                      fontSize: '1.5rem',
+                      color: 'white'
+                    }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button
+                onClick={closeProfileEditor}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  padding: '0.8rem 1.5rem',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveProfile}
+                style={{
+                  background: 'linear-gradient(135deg, #ff6b9d, #8b5cf6)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.8rem 1.5rem',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+                }}
+              >
+                💾 Guardar Perfil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
