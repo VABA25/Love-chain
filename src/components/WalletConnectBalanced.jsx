@@ -938,16 +938,26 @@ const WalletConnectBalanced = () => {
               <div key={index} style={{
                 marginBottom: '1rem',
                 display: 'flex',
-                justifyContent: msg.sender === 'me' ? 'flex-end' : 'flex-start'
+                justifyContent: msg.sender === 'system' ? 'center' : msg.sender === 'me' ? 'flex-end' : 'flex-start'
               }}>
                 <div style={{
-                  background: msg.sender === 'me' ? '#ff6b6b' : msg.sender === 'system' ? '#4CAF50' : 'white',
+                  background: msg.sender === 'me' 
+                    ? '#ff6b6b' 
+                    : msg.sender === 'system' 
+                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                      : 'white',
                   color: msg.sender === 'me' || msg.sender === 'system' ? 'white' : '#333',
-                  padding: '12px 16px',
-                  borderRadius: '18px',
-                  maxWidth: '70%',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                  fontSize: '0.9rem'
+                  padding: msg.sender === 'system' ? '8px 20px' : '12px 16px',
+                  borderRadius: msg.sender === 'system' ? '25px' : '18px',
+                  maxWidth: msg.sender === 'system' ? '85%' : '70%',
+                  boxShadow: msg.sender === 'system' 
+                    ? '0 4px 15px rgba(102, 126, 234, 0.3)' 
+                    : '0 2px 5px rgba(0,0,0,0.1)',
+                  fontSize: msg.sender === 'system' ? '0.85rem' : '0.9rem',
+                  fontWeight: msg.sender === 'system' ? '500' : 'normal',
+                  textAlign: msg.sender === 'system' ? 'center' : 'left',
+                  border: msg.sender === 'system' ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                  backdropFilter: msg.sender === 'system' ? 'blur(10px)' : 'none'
                 }}>
                   {msg.sender !== 'me' && msg.sender !== 'system' && (
                     <div style={{ fontSize: '0.8rem', opacity: 0.8, marginBottom: '4px' }}>
