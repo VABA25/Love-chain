@@ -5,7 +5,21 @@ import { useAnchorProgram } from '../hooks/useAnchor';
 const WalletConnectBalanced = () => {
   console.log('🔍 WalletConnectBalanced se está renderizando');
   const { publicKey, connect, select, wallets } = useWallet();
-  const { program, wallet, connection } = useAnchorProgram();
+  const { 
+    program, 
+    wallet, 
+    connection,
+    solBalance,
+    loveBalance,
+    isLoading,
+    transactions,
+    checkBalance,
+    sendLoveTokens,
+    createUserProfile,
+    recordLike,
+    isDemoMode
+  } = useAnchorProgram();
+  
   const [nickname, setNickname] = useState('');
   const [userRegistered, setUserRegistered] = useState(false);
   const [likesReceived, setLikesReceived] = useState(0);
@@ -17,7 +31,6 @@ const WalletConnectBalanced = () => {
   const [chatPartner, setChatPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [solBalance, setSolBalance] = useState(0);
   
   // Solo un ref para chat - optimizado
   const chatTimeoutRef = useRef(null);
@@ -65,17 +78,13 @@ const WalletConnectBalanced = () => {
     };
   }, []);
 
-  // 🎯 SIMULACIÓN DE BALANCE SOL PARA TESTING
+  // 🎯 AUTO-CHECK BALANCE WHEN WALLET CONNECTS
   useEffect(() => {
-    if (publicKey) {
-      console.log('💰 Simulando balance de SOL para testing...');
-      // Simular que tenemos 2.5 SOL para pruebas
-      setSolBalance(2.5);
-      console.log('✅ Balance simulado: 2.5 SOL (fake para testing)');
-    } else {
-      setSolBalance(0);
+    if (publicKey && checkBalance) {
+      console.log('💰 Checking blockchain balance...');
+      checkBalance();
     }
-  }, [publicKey]);
+  }, [publicKey, checkBalance]);
 
   const handleRegisterUser = async () => {
     if (!nickname.trim()) {
@@ -90,34 +99,42 @@ const WalletConnectBalanced = () => {
     
     setIsRegistering(true);
     
-    // 💰 SIMULAR COSTO DE REGISTRO 
+    // 💰 VERIFICAR BALANCE PARA REGISTRO 
     const registrationCost = 0.01; // 0.01 SOL para crear perfil SBT
     if (solBalance < registrationCost) {
-      alert(`⚠️ No tienes suficiente SOL para registrarte. Necesitas ${registrationCost} SOL. Balance actual: ${solBalance} SOL`);
+      alert(`⚠️ No tienes suficiente SOL para registrarte. Necesitas ${registrationCost} SOL. Balance actual: ${solBalance.toFixed(3)} SOL`);
       setIsRegistering(false);
       return;
     }
     
-    // Probar conexión blockchain
-    if (program && wallet) {
-      console.log('🚀 Usando blockchain real para registro!');
-      console.log('Program:', program);
-      console.log('Wallet:', wallet.publicKey.toString());
-      // TODO: Llamar smart contract aquí
-    } else {
-      console.log('⚠️ Usando modo demo para registro');
-    }
-    
-    // Timeout rápido
-    setTimeout(() => {
-      // Descontar SOL por crear perfil SBT
-      setSolBalance(prev => prev - registrationCost);
-      console.log(`💸 Registro completado: -${registrationCost} SOL (creación de perfil SBT)`);
+    try {
+      console.log('🚀 Creando perfil en blockchain...');
       
-      setUserRegistered(true);
+      const profileData = {
+        nickname: nickname,
+        walletAddress: publicKey.toString(),
+        timestamp: Date.now(),
+        version: '1.0'
+      };
+      
+      // Usar la función blockchain del hook
+      const result = await createUserProfile(profileData);
+      
+      if (result) {
+        console.log('✅ Perfil creado exitosamente:', result);
+        setUserRegistered(true);
+        setIsRegistering(false);
+        
+        const mode = isDemoMode ? 'DEMO' : 'BLOCKCHAIN';
+        alert(`🎉 ¡Bienvenido ${nickname}! Tu perfil SBT ha sido creado en Solana (${mode}) - Transacción: ${result.signature}`);
+      } else {
+        throw new Error('Failed to create profile');
+      }
+    } catch (error) {
+      console.error('❌ Error creating profile:', error);
       setIsRegistering(false);
-      alert(`🎉 ¡Bienvenido ${nickname}! Tu perfil SBT ha sido creado en Solana (-${registrationCost} SOL).`);
-    }, 1200);
+      alert('❌ Error al crear el perfil. Inténtalo de nuevo.');
+    }
   };
 
   const startChat = (profile) => {
@@ -157,29 +174,95 @@ const WalletConnectBalanced = () => {
     setMessages([]);
   };
 
-  const handleSwipe = (direction) => {
-    const currentProfile = profiles[currentProfileIndex];
+  // 💖 ENVIAR LOVE TOKENS
+  const sendLoveGift = async (amount = 10) => {
+    if (!chatPartner) return;
     
-    // 💰 SIMULAR COSTO DE TRANSACCIÓN
-    const transactionCost = 0.0001; // Muy barato para testing
-    if (solBalance < transactionCost) {
-      alert('⚠️ No tienes suficiente SOL para esta transacción. Balance: ' + solBalance + ' SOL');
+    if (loveBalance < amount) {
+      alert(`⚠️ No tienes suficientes LOVE tokens. Balance: ${loveBalance} LOVE`);
       return;
     }
     
-    // Descontar SOL por la transacción
-    setSolBalance(prev => prev - transactionCost);
-    console.log(`💸 Transacción: -${transactionCost} SOL (${direction === 'right' ? 'Like' : 'Pass'})`);
+    try {
+      console.log(`💖 Sending ${amount} LOVE tokens to ${chatPartner.name}...`);
+      
+      // Simular dirección de destino (en realidad vendría del perfil del usuario)
+      const recipientAddress = `${chatPartner.name.toLowerCase()}_demo_address_${chatPartner.id}`;
+      
+      const result = await sendLoveTokens(recipientAddress, amount);
+      
+      if (result) {
+        console.log('✅ LOVE tokens sent:', result);
+        
+        // Añadir mensaje al chat
+        setMessages(prev => [...prev, 
+          { 
+            sender: 'system', 
+            text: `💖 Has enviado ${amount} LOVE tokens a ${chatPartner.name}!` 
+          },
+          { 
+            sender: 'me', 
+            text: `💝 Te envié ${amount} LOVE tokens como regalo!` 
+          }
+        ]);
+        
+        // Respuesta automática del partner
+        setTimeout(() => {
+          setMessages(prev => [...prev, { 
+            sender: chatPartner.name, 
+            text: `¡Wow! ✨ ¡Gracias por los ${amount} LOVE tokens! Eres increíble 💕`
+          }]);
+        }, 1500);
+        
+        const mode = isDemoMode ? 'DEMO' : 'BLOCKCHAIN';
+        console.log(`💖 LOVE gift transaction: ${result.signature} (${mode})`);
+      }
+    } catch (error) {
+      console.error('❌ Error sending LOVE tokens:', error);
+      alert('❌ Error al enviar LOVE tokens. Inténtalo de nuevo.');
+    }
+  };
+
+  const handleSwipe = async (direction) => {
+    const currentProfile = profiles[currentProfileIndex];
+    
+    // 💰 VERIFICAR BALANCE PARA TRANSACCIÓN
+    const transactionCost = 0.0001; // Muy barato para testing
+    if (solBalance < transactionCost) {
+      alert(`⚠️ No tienes suficiente SOL para esta transacción. Balance: ${solBalance.toFixed(4)} SOL`);
+      return;
+    }
     
     if (direction === 'right') {
-      // Incrementar likes recibidos
-      setLikesReceived(prev => prev + 1);
-      
-      // 65% probabilidad de match
-      if (Math.random() > 0.35) {
-        setMatches(prev => [...prev, currentProfile]);
-        setShowMatchPopup(currentProfile);
+      try {
+        console.log('� Recording like on blockchain...');
+        
+        // Usar la función blockchain del hook
+        const result = await recordLike(currentProfile.id.toString());
+        
+        if (result) {
+          console.log('✅ Like recorded:', result);
+          
+          // Incrementar likes recibidos
+          setLikesReceived(prev => prev + 1);
+          
+          // Check if it's a match
+          if (result.isMatch) {
+            setMatches(prev => [...prev, currentProfile]);
+            setShowMatchPopup(currentProfile);
+            console.log('🎉 IT\'S A MATCH!', result);
+          }
+          
+          const mode = isDemoMode ? 'DEMO' : 'BLOCKCHAIN';
+          console.log(`💸 Like transaction: ${result.signature} (${mode})`);
+        }
+      } catch (error) {
+        console.error('❌ Error recording like:', error);
+        alert('❌ Error al registrar el like. Inténtalo de nuevo.');
+        return;
       }
+    } else {
+      console.log('👎 Pass recorded (no blockchain transaction needed)');
     }
     
     // Avanzar perfil
@@ -356,15 +439,21 @@ const WalletConnectBalanced = () => {
         }}>
           <h3 style={{ marginBottom: '1rem' }}>📝 Crear Perfil SBT</h3>
           <div style={{ 
-            background: '#e8f5e8', 
+            background: isDemoMode ? '#fff3cd' : '#e8f5e8', 
             padding: '0.8rem', 
             borderRadius: '8px', 
             marginBottom: '1rem',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
+            border: isDemoMode ? '2px solid #ffc107' : '2px solid #28a745'
           }}>
             🔗 <strong>Wallet:</strong> {publicKey.toString().slice(0, 8)}...{publicKey.toString().slice(-8)}
             <br />
-            💰 <strong>Balance:</strong> {solBalance} SOL {solBalance > 0 ? '(simulado para testing)' : ''}
+            💰 <strong>SOL Balance:</strong> {solBalance.toFixed(4)} SOL
+            <br />
+            💖 <strong>LOVE Balance:</strong> {loveBalance} LOVE
+            <br />
+            🎭 <strong>Mode:</strong> {isDemoMode ? 'DEMO (Safe Testing)' : 'LIVE BLOCKCHAIN'} 
+            {isLoading && ' 🔄 Loading...'}
           </div>
           <input
             type="text"
@@ -663,7 +752,80 @@ const WalletConnectBalanced = () => {
             >
               📤
             </button>
+            <button
+              onClick={() => sendLoveGift(10)}
+              disabled={isLoading || loveBalance < 10}
+              style={{
+                background: loveBalance >= 10 ? 'linear-gradient(135deg, #ff6b9d, #8b5cf6)' : '#ccc',
+                color: 'white',
+                border: 'none',
+                padding: '12px 16px',
+                borderRadius: '25px',
+                cursor: loveBalance >= 10 ? 'pointer' : 'not-allowed',
+                fontSize: '0.9rem',
+                fontWeight: 'bold',
+                opacity: isLoading ? 0.7 : 1
+              }}
+            >
+              {isLoading ? '🔄' : '💖 10 LOVE'}
+            </button>
           </div>
+        </div>
+      )}
+
+      {/* Blockchain Transactions Panel */}
+      {userRegistered && transactions.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: 'rgba(0,0,0,0.9)',
+          color: 'white',
+          padding: '1rem',
+          borderRadius: '12px',
+          maxWidth: '300px',
+          maxHeight: '200px',
+          overflowY: 'auto',
+          fontSize: '0.8rem',
+          zIndex: 1000
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+            🔗 Recent Transactions
+          </div>
+          {transactions.slice(0, 3).map((tx, index) => (
+            <div key={tx.id} style={{ 
+              marginBottom: '0.5rem', 
+              padding: '0.5rem',
+              background: 'rgba(255,255,255,0.1)',
+              borderRadius: '6px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'bold' }}>
+                  {tx.type === 'LOVE_TRANSFER' ? '💖' : 
+                   tx.type === 'CREATE_PROFILE' ? '👤' : 
+                   tx.type === 'LIKE' ? '👍' : '🔄'}
+                  {tx.type.replace('_', ' ')}
+                </span>
+                <span style={{ 
+                  background: tx.status === 'confirmed' ? 'green' : 'orange',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  fontSize: '0.7rem'
+                }}>
+                  {tx.status}
+                </span>
+              </div>
+              {tx.amount && (
+                <div>Amount: {tx.amount} {tx.type === 'LOVE_TRANSFER' ? 'LOVE' : 'SOL'}</div>
+              )}
+              <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>
+                {new Date(tx.timestamp).toLocaleTimeString()}
+              </div>
+              <div style={{ fontSize: '0.7rem', opacity: 0.6, wordBreak: 'break-all' }}>
+                {tx.signature}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
