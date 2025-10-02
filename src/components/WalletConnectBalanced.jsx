@@ -71,6 +71,8 @@ const WalletConnectBalanced = () => {
   
   // 👤 PROFILE EDITING SYSTEM
   const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [showProfileViewer, setShowProfileViewer] = useState(false);
+  const [viewingProfile, setViewingProfile] = useState(null);
   const [userProfile, setUserProfile] = useState({
     nickname: '',
     bio: 'Nuevo en el mundo crypto 🚀 | Buscando mi match perfecto 💕',
@@ -399,6 +401,17 @@ const WalletConnectBalanced = () => {
       console.log('📂 Perfil cargado desde localStorage:', parsed);
     }
   }, []);
+
+  // 👀 PROFILE VIEWER FUNCTIONS
+  const showProfile = (profile) => {
+    setViewingProfile(profile);
+    setShowProfileViewer(true);
+  };
+
+  const closeProfileViewer = () => {
+    setShowProfileViewer(false);
+    setViewingProfile(null);
+  };
 
   const handleSwipe = async (direction) => {
     const currentProfile = profiles[currentProfileIndex];
@@ -732,17 +745,42 @@ const WalletConnectBalanced = () => {
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
               {currentProfile?.emoji || '👤'}
             </div>
-            <h3 style={{ margin: '0 0 0.5rem 0' }}>
+            <h3 
+              style={{ 
+                margin: '0 0 0.5rem 0',
+                cursor: 'pointer',
+                color: '#667eea',
+                textDecoration: 'underline',
+                transition: 'color 0.3s ease'
+              }}
+              onClick={() => showProfile(currentProfile)}
+              onMouseEnter={(e) => e.target.style.color = '#764ba2'}
+              onMouseLeave={(e) => e.target.style.color = '#667eea'}
+            >
               {currentProfile?.name || 'Usuario'}, {currentProfile?.age || 25}
             </h3>
             <p style={{ 
               fontSize: '0.9rem', 
               lineHeight: 1.4,
               marginBottom: '1rem',
-              color: '#666'
+              color: '#666',
+              textAlign: 'center',
+              maxHeight: '4.2em',
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical'
             }}>
               {currentProfile?.bio || 'Usuario de LoveChain'}
             </p>
+            <div style={{ 
+              fontSize: '0.75rem', 
+              color: '#888', 
+              marginBottom: '0.5rem',
+              fontStyle: 'italic'
+            }}>
+              💡 Haz clic en el nombre para ver más detalles
+            </div>
             <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1.5rem' }}>
               📍 {currentProfile?.location || 'Ubicación desconocida'}
             </div>
@@ -856,7 +894,21 @@ const WalletConnectBalanced = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ fontSize: '2rem' }}>{chatPartner.emoji}</div>
               <div>
-                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{chatPartner.name}</div>
+                <div 
+                  style={{ 
+                    fontWeight: 'bold', 
+                    fontSize: '1.2rem',
+                    cursor: 'pointer',
+                    color: 'white',
+                    textDecoration: 'underline',
+                    transition: 'opacity 0.3s ease'
+                  }}
+                  onClick={() => showProfile(chatPartner)}
+                  onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+                  onMouseLeave={(e) => e.target.style.opacity = '1'}
+                >
+                  {chatPartner.name}
+                </div>
                 <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>{chatPartner.location}</div>
               </div>
             </div>
@@ -1368,6 +1420,167 @@ const WalletConnectBalanced = () => {
                 💾 Guardar Perfil
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 👀 PROFILE VIEWER MODAL */}
+      {showProfileViewer && viewingProfile && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '2rem',
+            borderRadius: '20px',
+            maxWidth: '450px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            color: 'white',
+            textAlign: 'center'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1.5rem' }}>👤 Perfil</h2>
+              <button
+                onClick={closeProfileViewer}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '30px',
+                  height: '30px',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Avatar grande */}
+            <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>
+              {viewingProfile.emoji || '👤'}
+            </div>
+
+            {/* Información básica */}
+            <h3 style={{ 
+              margin: '0 0 0.5rem 0', 
+              fontSize: '1.8rem',
+              color: 'white'
+            }}>
+              {viewingProfile.name}
+            </h3>
+            
+            <div style={{ 
+              fontSize: '1.2rem', 
+              marginBottom: '1rem',
+              opacity: 0.9
+            }}>
+              🎂 {viewingProfile.age} años
+            </div>
+
+            <div style={{ 
+              fontSize: '1rem', 
+              marginBottom: '1.5rem',
+              opacity: 0.9,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
+            }}>
+              📍 {viewingProfile.location}
+            </div>
+
+            {/* Bio completa */}
+            <div style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '1.5rem',
+              borderRadius: '15px',
+              marginBottom: '1.5rem',
+              textAlign: 'left'
+            }}>
+              <h4 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: '1.1rem',
+                color: '#ffeb3b',
+                textAlign: 'center'
+              }}>
+                💭 Sobre mí
+              </h4>
+              <p style={{ 
+                fontSize: '1rem', 
+                lineHeight: 1.5,
+                margin: 0,
+                color: 'white'
+              }}>
+                {viewingProfile.bio}
+              </p>
+            </div>
+
+            {/* Estadísticas adicionales */}
+            <div style={{
+              background: 'rgba(255,255,255,0.1)',
+              padding: '1rem',
+              borderRadius: '15px',
+              marginBottom: '1.5rem'
+            }}>
+              <h4 style={{ 
+                margin: '0 0 1rem 0', 
+                fontSize: '1.1rem',
+                color: '#4CAF50'
+              }}>
+                📊 En LoveChain
+              </h4>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-around',
+                fontSize: '0.9rem'
+              }}>
+                <div>
+                  <div style={{ fontSize: '1.5rem' }}>💖</div>
+                  <div>Perfil activo</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.5rem' }}>⛓️</div>
+                  <div>Verificado</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '1.5rem' }}>🚀</div>
+                  <div>Web3 Native</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Botón para cerrar */}
+            <button
+              onClick={closeProfileViewer}
+              style={{
+                background: 'linear-gradient(135deg, #ff6b9d, #8b5cf6)',
+                color: 'white',
+                border: 'none',
+                padding: '0.8rem 2rem',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                width: '100%'
+              }}
+            >
+              🔙 Volver
+            </button>
           </div>
         </div>
       )}
