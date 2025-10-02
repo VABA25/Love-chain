@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '../hooks/useAnchor';
 
@@ -238,7 +238,7 @@ const WalletConnectBalanced = () => {
         console.log('� Recording like on blockchain...');
         
         // Usar la función blockchain del hook
-        const result = await recordLike(currentProfile.id.toString());
+        const result = await recordLike(currentProfile?.id?.toString() || 'unknown');
         
         if (result) {
           console.log('✅ Like recorded:', result);
@@ -275,7 +275,10 @@ const WalletConnectBalanced = () => {
     }
   };
 
-  const currentProfile = profiles[currentProfileIndex];
+  const currentProfile = profiles[currentProfileIndex] || profiles[0];
+
+  // Memorizar si se puede enviar LOVE tokens para evitar re-renders
+  const canSendLove = useMemo(() => loveBalance >= 10, [loveBalance]);
 
   return (
     <div style={{ 
@@ -536,10 +539,10 @@ const WalletConnectBalanced = () => {
               border: '1px solid rgba(255,255,255,0.3)'
             }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
-              {currentProfile.emoji}
+              {currentProfile?.emoji || '👤'}
             </div>
             <h3 style={{ margin: '0 0 0.5rem 0' }}>
-              {currentProfile.name}, {currentProfile.age}
+              {currentProfile?.name || 'Usuario'}, {currentProfile?.age || 25}
             </h3>
             <p style={{ 
               fontSize: '0.9rem', 
@@ -547,10 +550,10 @@ const WalletConnectBalanced = () => {
               marginBottom: '1rem',
               color: '#666'
             }}>
-              {currentProfile.bio}
+              {currentProfile?.bio || 'Usuario de LoveChain'}
             </p>
             <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1.5rem' }}>
-              📍 {currentProfile.location}
+              📍 {currentProfile?.location || 'Ubicación desconocida'}
             </div>
             
             {/* Botones de acción */}
@@ -752,7 +755,7 @@ const WalletConnectBalanced = () => {
             >
               📤
             </button>
-            {loveBalance >= 10 && (
+            {canSendLove && (
               <button
                 onClick={() => sendLoveGift(10)}
                 disabled={isLoading}
@@ -772,7 +775,7 @@ const WalletConnectBalanced = () => {
                 {isLoading ? '🔄 Enviando...' : '💖 Enviar 10 LOVE'}
               </button>
             )}
-            {loveBalance < 10 && (
+            {!canSendLove && (
               <div style={{
                 color: '#666',
                 fontSize: '0.8rem',

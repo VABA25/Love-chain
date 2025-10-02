@@ -63,12 +63,15 @@ export function useAnchorProgram() {
     setIsLoading(true);
     
     if (DEMO_MODE) {
-      // Simulate network delay
+      // Simulate network delay but keep balances stable
       setTimeout(() => {
-        setSolBalance(DEMO_SOL_BALANCE + (Math.random() * 0.1)); // Small random variation
-        setLoveBalance(DEMO_LOVE_BALANCE + Math.floor(Math.random() * 100));
+        // Solo actualizar si aún no están inicializados
+        if (solBalance === 0 && loveBalance === 0) {
+          setSolBalance(DEMO_SOL_BALANCE);
+          setLoveBalance(DEMO_LOVE_BALANCE);
+          console.log('🎭 Demo balance initialized:', { sol: DEMO_SOL_BALANCE, love: DEMO_LOVE_BALANCE });
+        }
         setIsLoading(false);
-        console.log('🎭 Demo balance updated:', { sol: solBalance, love: loveBalance });
       }, 1000);
     } else {
       try {
