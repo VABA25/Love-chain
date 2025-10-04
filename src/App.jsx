@@ -11,7 +11,6 @@ import {
   SolflareWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import logo from './assets/logo.png';
 
 const endpoint = 'https://api.devnet.solana.com';
 const wallets = [

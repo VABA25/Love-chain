@@ -3,7 +3,6 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '../hooks/useAnchor';
 
 const WalletConnectBalanced = () => {
-  console.log('🔍 WalletConnectBalanced se está renderizando');
   
   // Añadir estilos CSS para las notificaciones
   useEffect(() => {
@@ -86,7 +85,7 @@ const WalletConnectBalanced = () => {
   const chatTimeoutRef = useRef(null);
 
   // 10 perfiles diversos para una experiencia más rica
-  const profiles = [
+  const profiles = useMemo(() => [
     {
       id: 1,
       name: "Ana",
@@ -167,7 +166,7 @@ const WalletConnectBalanced = () => {
       emoji: "👨‍🏫",
       location: "Amsterdam"
     }
-  ];
+  ], []);
 
   // Cleanup optimizado
   useEffect(() => {
